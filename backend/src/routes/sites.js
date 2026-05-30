@@ -1,54 +1,54 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db');
+const pool = require('../config/db');
 
 // GET all sites
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const sites = db.prepare('SELECT * FROM sites WHERE is_active = 1').all();
-    res.json({ success: true, data: sites });
+    const result = await pool.query('SELECT * FROM sites WHERE is_active = true');
+    res.json({ success: true, data: result.rows });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // GET single site
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const site = db.prepare('SELECT * FROM sites WHERE id = ?').get(req.params.id);
-    if (!site) return res.status(404).json({ success: false, error: 'Site not found' });
-    res.json({ success: true, data: site });
+    const result = await pool.query('SELECT * FROM sites WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Site not found' });
+    res.json({ success: true, data: result.rows[0] });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // POST create site
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { name, city, address, site_type, manager_name, phone } = req.body;
     if (!name || !city) {
       return res.status(400).json({ success: false, error: 'Name and city are required' });
     }
-    const result = db.prepare(`
+    const result = await pool.query(`
       INSERT INTO sites (name, city, address, site_type, manager_name, phone)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(name, city, address, site_type || 'site', manager_name, phone);
-    res.json({ success: true, message: 'Site added!', id: result.lastInsertRowid });
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
+    `, [name, city, address, site_type || 'site', manager_name, phone]);
+    res.json({ success: true, message: 'Site added!', id: result.rows[0].id });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
 // PUT update site
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const { name, city, address, site_type, manager_name, phone } = req.body;
-    db.prepare(`
+    await pool.query(`
       UPDATE sites 
-      SET name=?, city=?, address=?, site_type=?, manager_name=?, phone=?
-      WHERE id=?
-    `).run(name, city, address, site_type, manager_name, phone, req.params.id);
+      SET name=$1, city=$2, address=$3, site_type=$4, manager_name=$5, phone=$6
+      WHERE id=$7
+    `, [name, city, address, site_type, manager_name, phone, req.params.id]);
     res.json({ success: true, message: 'Site updated!' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -56,9 +56,9 @@ router.put('/:id', (req, res) => {
 });
 
 // DELETE site
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    db.prepare('UPDATE sites SET is_active = 0 WHERE id = ?').run(req.params.id);
+    await pool.query('UPDATE sites SET is_active = false WHERE id = $1', [req.params.id]);
     res.json({ success: true, message: 'Site deleted!' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
