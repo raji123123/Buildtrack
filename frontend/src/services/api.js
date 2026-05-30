@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: 'https://buildtrack-backend-0lvc.onrender.com/api'
 });
 
 // Materials
