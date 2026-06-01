@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getMaterials, getSites, getVendors, getTransactions } from './services/api';
 import Login from './pages/Login';
+import Materials from './pages/Materials';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -170,40 +171,14 @@ function App() {
             </div>
           </div>
         )}
-
         {/* MATERIALS */}
-        {activeTab === 'materials' && (
-          <div>
-            <h1 style={styles.pageTitle}>Materials</h1>
-            <div style={styles.table}>
-              <table style={styles.tableEl}>
-                <thead>
-                  <tr style={styles.tableHeader}>
-                    <th style={styles.th}>Name</th>
-                    <th style={styles.th}>Category</th>
-                    <th style={styles.th}>SKU</th>
-                    <th style={styles.th}>Unit</th>
-                    <th style={styles.th}>Min Stock</th>
-                    <th style={styles.th}>Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {materials.map(m => (
-                    <tr key={m.id} style={styles.tableRow}>
-                      <td style={styles.td}>{m.name}</td>
-                      <td style={styles.td}>{m.category_name}</td>
-                      <td style={styles.td}>{m.sku}</td>
-                      <td style={styles.td}>{m.unit}</td>
-                      <td style={styles.td}>{m.min_stock}</td>
-                      <td style={styles.td}>₹{m.unit_price}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
+{activeTab === 'materials' && (
+  <Materials
+    materials={materials}
+    sites={sites}
+    onRefresh={loadAllData}
+  />
+)}
         {/* INVENTORY */}
         {activeTab === 'inventory' && (
           <div>
