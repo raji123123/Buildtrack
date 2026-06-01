@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const db = require('./src/config/db');
+const pool = require('./src/config/db');
 
 dotenv.config();
 
@@ -16,11 +16,13 @@ const materialsRouter = require('./src/routes/materials');
 const sitesRouter = require('./src/routes/sites');
 const vendorsRouter = require('./src/routes/vendors');
 const transactionsRouter = require('./src/routes/transactions');
+const authRouter = require('./src/routes/auth');
 
 app.use('/api/materials', materialsRouter);
 app.use('/api/sites', sitesRouter);
 app.use('/api/vendors', vendorsRouter);
 app.use('/api/transactions', transactionsRouter);
+app.use('/api/auth', authRouter);
 
 // Test route
 app.get('/', (req, res) => {
