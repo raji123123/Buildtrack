@@ -60,8 +60,14 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE material
+// DELETE material
 router.delete('/:id', async (req, res) => {
   try {
+    // First delete related records
+    await pool.query('DELETE FROM site_stock WHERE material_id = $1', [req.params.id]);
+    await pool.query('DELETE FROM transactions WHERE material_id = $1', [req.params.id]);
+    await pool.query('DELETE FROM transfers WHERE material_id = $1', [req.params.id]);
+    // Then delete material
     await pool.query('DELETE FROM materials WHERE id = $1', [req.params.id]);
     res.json({ success: true, message: 'Material deleted!' });
   } catch (err) {
