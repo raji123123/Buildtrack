@@ -91,4 +91,14 @@ router.get('/site/:siteId', async (req, res) => {
   }
 });
 
+// DELETE transaction
+router.delete('/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM transactions WHERE id = $1', [req.params.id]);
+    res.json({ success: true, message: 'Transaction deleted!' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
