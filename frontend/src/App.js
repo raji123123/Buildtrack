@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getMaterials, getSites, getVendors, getTransactions } from './services/api';
 import Login from './pages/Login';
 import Materials from './pages/Materials';
+import Inventory from './pages/Inventory';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -180,40 +181,15 @@ function App() {
   />
 )}
         {/* INVENTORY */}
-        {activeTab === 'inventory' && (
-          <div>
-            <h1 style={styles.pageTitle}>Inventory Log</h1>
-            <div style={styles.table}>
-              <table style={styles.tableEl}>
-                <thead>
-                  <tr style={styles.tableHeader}>
-                    <th style={styles.th}>Material</th>
-                    <th style={styles.th}>Type</th>
-                    <th style={styles.th}>Quantity</th>
-                    <th style={styles.th}>Site</th>
-                    <th style={styles.th}>Note</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.map(tx => (
-                    <tr key={tx.id} style={styles.tableRow}>
-                      <td style={styles.td}>{tx.material_name}</td>
-                      <td style={styles.td}>
-                        <span style={{ ...styles.badge, background: tx.transaction_type === 'inward' ? '#d1fae5' : tx.transaction_type === 'outward' ? '#dbeafe' : tx.transaction_type === 'damaged' ? '#fee2e2' : '#fef3c7', color: tx.transaction_type === 'inward' ? '#065f46' : tx.transaction_type === 'outward' ? '#1e40af' : tx.transaction_type === 'damaged' ? '#991b1b' : '#92400e' }}>
-                          {tx.transaction_type}
-                        </span>
-                      </td>
-                      <td style={styles.td}>{tx.quantity} {tx.material_unit}</td>
-                      <td style={styles.td}>{tx.site_name}</td>
-                      <td style={styles.td}>{tx.note || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
+{activeTab === 'inventory' && (
+  <Inventory
+    transactions={transactions}
+    materials={materials}
+    sites={sites}
+    onRefresh={loadAllData}
+  />
+)}
+    
         {/* SITES */}
         {activeTab === 'sites' && (
           <div>
