@@ -21,5 +21,6 @@ export const addVendor = (data) => API.post('/vendors', data);
 // Transactions
 export const getTransactions = () => API.get('/transactions');
 export const addTransaction = (data) => API.post('/transactions', data);
+export const deleteTransaction = (id) => API.delete(`/transactions/${id}`);
 
 export default API;

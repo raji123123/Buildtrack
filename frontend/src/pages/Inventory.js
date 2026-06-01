@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addTransaction } from '../services/api';
+import { addTransaction, deleteTransaction } from '../services/api';
 
 function Inventory({ transactions, materials, sites, onRefresh }) {
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +39,17 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this entry?')) return;
+    try {
+      await deleteTransaction(id);
+      showNotify('Entry deleted!');
+      onRefresh();
+    } catch (err) {
+      showNotify('Delete failed!', 'error');
+    }
+  };
+
   const TX_COLORS = {
     inward: { bg: '#d1fae5', color: '#065f46' },
     outward: { bg: '#dbeafe', color: '#1e40af' },
@@ -51,14 +62,12 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
 
   return (
     <div>
-      {/* Notification */}
       {notify && (
         <div style={{ ...styles.notify, background: notify.type === 'error' ? '#fee2e2' : '#d1fae5', color: notify.type === 'error' ? '#991b1b' : '#065f46', border: `1px solid ${notify.type === 'error' ? '#fca5a5' : '#6ee7b7'}` }}>
           {notify.type === 'error' ? '⚠️' : '✅'} {notify.msg}
         </div>
       )}
 
-      {/* Header */}
       <div style={styles.header}>
         <div>
           <h1 style={styles.title}>Inventory Log</h1>
@@ -67,7 +76,6 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
         <button onClick={() => setShowForm(true)} style={styles.addBtn}>+ New Entry</button>
       </div>
 
-      {/* Filter tabs */}
       <div style={styles.tabs}>
         {['all', 'inward', 'outward', 'damaged', 'purchase'].map(t => (
           <button key={t} onClick={() => setFilterType(t)} style={{
@@ -81,7 +89,6 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
         ))}
       </div>
 
-      {/* Transactions list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.map(tx => {
           const colors = TX_COLORS[tx.transaction_type] || TX_COLORS.inward;
@@ -103,12 +110,12 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
               <span style={{ ...styles.badge, background: colors.bg, color: colors.color }}>
                 {tx.transaction_type}
               </span>
+              <button onClick={() => handleDelete(tx.id)} style={styles.deleteBtn}>🗑️</button>
             </div>
           );
         })}
       </div>
 
-      {/* Modal Form */}
       {showForm && (
         <div style={styles.overlay} onClick={() => setShowForm(false)}>
           <div style={styles.modal} onClick={e => e.stopPropagation()}>
@@ -116,9 +123,7 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
               <h2 style={styles.modalTitle}>➕ New Inventory Entry</h2>
               <button onClick={() => setShowForm(false)} style={styles.closeBtn}>✕</button>
             </div>
-
             <div style={{ padding: 24 }}>
-              {/* Entry Type */}
               <div style={styles.field}>
                 <label style={styles.label}>Entry Type *</label>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -138,7 +143,6 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
                   ))}
                 </div>
               </div>
-
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 16 }}>
                 <div style={styles.field}>
                   <label style={styles.label}>Material *</label>
@@ -171,7 +175,6 @@ function Inventory({ transactions, materials, sites, onRefresh }) {
                 </div>
               </div>
             </div>
-
             <div style={styles.modalFooter}>
               <button onClick={() => setShowForm(false)} style={styles.cancelBtn}>Cancel</button>
               <button onClick={handleSave} disabled={loading} style={styles.saveBtn}>
@@ -200,6 +203,7 @@ const styles = {
   txQty: { fontSize: 15, fontWeight: 700 },
   txDate: { fontSize: 11, color: '#9ca3af', marginTop: 2 },
   badge: { padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600, flexShrink: 0 },
+  deleteBtn: { background: '#fee2e2', color: '#991b1b', border: 'none', borderRadius: 6, padding: '5px 8px', fontSize: 14, cursor: 'pointer', flexShrink: 0 },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 },
   modal: { background: '#fff', borderRadius: 16, width: '100%', maxWidth: 560, maxHeight: '90vh', overflow: 'auto' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #f3f4f6' },
